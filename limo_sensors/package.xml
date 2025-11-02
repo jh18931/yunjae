@@ -2,7 +2,7 @@
 <package format="2">
   <name>limo_sensors</name>
   <version>0.1.0</version>
-  <description>LIMO camera & lidar bringup (meta-launch + wrappers)</description>
+  <description>LIMO camera &amp; lidar bringup (meta-launch + wrappers)</description>
 
   <maintainer email="you@example.com">Joohee Cho</maintainer>
   <license>BSD-3-Clause</license>
