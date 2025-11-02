@@ -15,7 +15,7 @@ public:
  void close();
  bool isOpen() const { return fd_>=0; }
 
-  // blocking-ish read/write with small timeouts
+
  int writeBytes(const uint8_t* data, int len);
  int readSome(uint8_t* buf, int maxlen);
 
@@ -68,7 +68,7 @@ inline bool SerialPort::open(const std::string& port, int baud){
  tcflush(fd_, TCIFLUSH);
  if (tcsetattr(fd_, TCSANOW, &tty) != 0) { close(); return false; }
 
-  // nonblocking → blocking-ish
+ 
  int flags = fcntl(fd_, F_GETFL, 0);
  fcntl(fd_, F_SETFL, flags & ~O_NONBLOCK);
 
