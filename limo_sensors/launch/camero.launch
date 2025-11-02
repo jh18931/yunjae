@@ -1,0 +1,23 @@
+<launch>
+  <rosparam file="$(find limo_sensors)/params/camera.yaml" command="load"/>
+
+  <!-- 벤더 드라이버가 있으면 그걸 쓰고, 없으면 Python 노드 사용 -->
+  <arg name="prefer_usb_cam" default="false"/>  <!-- true면 usb_cam 노드 우선 -->
+
+  <group if="$(arg prefer_usb_cam)">
+    <node pkg="usb_cam" type="usb_cam_node" name="usb_cam" output="screen" required="false">
+      <param name="video_device" value="$(param device)"/>
+      <param name="frame_id" value="$(param frame_id)"/>
+      <param name="image_width" value="$(param width)"/>
+      <param name="image_height" value="$(param height)"/>
+      <param name="framerate" value="$(param fps)"/>
+      <param name="pixel_format" value="mjpeg"/>
+    </node>
+  </group>
+
+  <group unless="$(arg prefer_usb_cam)">
+    <node pkg="limo_sensors" type="camera_node.py" name="camera_node" output="screen">
+      <rosparam file="$(find limo_sensors)/params/camera.yaml" command="load"/>
+    </node>
+  </group>
+</launch>

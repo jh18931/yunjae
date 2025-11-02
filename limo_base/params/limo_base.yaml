@@ -1,0 +1,25 @@
+# 하드웨어/프레임 설정
+port: "/dev/ttyUSB0"        # ugv_sdk 노드가 사용 (본 패키지는 토픽 인터페이스)
+baudrate: 115200
+
+odom_frame: "odom"
+base_link_frame: "base_link"
+publish_tf: true
+
+# 명령/보호
+drive_mode: "differential"  # differential|ackermann|mecanum (정보 전달용)
+linear_vel_limit: 0.60      # [m/s]
+angular_vel_limit: 1.20     # [rad/s]
+acc_lim_x: 0.80             # [m/s^2]
+acc_lim_theta: 1.50         # [rad/s^2]
+deadman_timeout: 0.5        # [s] 입력 없으면 자동 정지
+
+# ugv_sdk 인터페이스(토픽 이름 표준화)
+ugv_cmd_topic:      "/ugv_sdk/cmd_vel"     # geometry_msgs/Twist
+ugv_odom_topic:     "/ugv_sdk/odom"        # nav_msgs/Odometry
+ugv_imu_topic:      "/ugv_sdk/imu/data"    # sensor_msgs/Imu
+
+# 표준화된 출력(우리 스택이 사용하는 이름)
+cmd_sub_topic: "/cmd_vel"   # 최종 명령 입력(리미터/세이프티 이후)
+odom_pub_topic: "/odom"
+imu_pub_topic:  "/imu/data"

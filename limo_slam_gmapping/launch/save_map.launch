@@ -1,0 +1,12 @@
+<launch>
+  <arg name="output_dir" default="$(env HOME)/maps"/>
+  <arg name="map_name"   default="lab_obstacle_map"/>
+
+  <!-- 경로가 없으면 사용자가 미리 만들어두는 게 안전 -->
+  <!-- 저장: map_server/map_saver -->
+  <node pkg="map_server" type="map_saver" name="map_saver" output="screen"
+        args="-f $(arg output_dir)/$(arg map_name) --occ 65 --free 25">
+    <!-- 기본은 /map 구독; 다른 이름이면 remap -->
+    <!-- <remap from="map" to="/my_map_topic"/> -->
+  </node>
+</launch>

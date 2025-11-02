@@ -1,0 +1,27 @@
+<launch>
+  <arg name="odom_frame" default="odom"/>
+  <arg name="base_link_frame" default="base_link"/>
+  <arg name="publish_tf" default="true"/>
+
+  <!-- 공통 파라미터 로드 -->
+  <rosparam file="$(find limo_base)/params/limo_base.yaml" command="load"/>
+
+  <!-- (선택) ugv_sdk 노드: 실제 포트/통신은 ugv_sdk 패키지에서 처리 -->
+  <!-- 이미 상위 bringup에서 ugv_sdk.launch를 include 했다면 생략 가능 -->
+
+  <!-- /cmd_vel → /ugv_sdk/cmd_vel -->
+  <node pkg="limo_base" type="limo_base_node" name="limo_base_node" output="screen">
+    <param name="linear_vel_limit" value="$(arg linear_vel_limit)"/>
+    <param name="angular_vel_limit" value="$(arg angular_vel_limit)"/>
+    <param name="acc_lim_x" value="$(arg acc_lim_x)"/>
+    <param name="acc_lim_theta" value="$(arg acc_lim_theta)"/>
+    <param name="deadman_timeout" value="$(arg deadman_timeout)"/>
+  </node>
+
+  <!-- /ugv_sdk/odom, /ugv_sdk/imu/data → /odom, /imu/data (+TF) -->
+  <node pkg="limo_base" type="odom_publisher" name="odom_publisher" output="screen">
+    <param name="odom_frame" value="$(arg odom_frame)"/>
+    <param name="base_link_frame" value="$(arg base_link_frame)"/>
+    <param name="publish_tf" value="$(arg publish_tf)"/>
+  </node>
+</launch>

@@ -1,0 +1,29 @@
+<launch>
+  <!-- 시뮬레이션 시간 사용 여부 (bag 재생 시 유용) -->
+  <arg name="use_sim_time" default="false"/>
+  <param name="use_sim_time" value="$(arg use_sim_time)"/>
+
+  <!-- 메쉬 사용 여부 & 센서 위치 오버라이드 -->
+  <arg name="use_mesh" default="false"/>
+  <arg name="lidar_x"  default="0.12"/>
+  <arg name="lidar_z"  default="0.18"/>
+  <arg name="camera_x" default="0.14"/>
+  <arg name="camera_z" default="0.20"/>
+  <arg name="imu_x"    default="0.0"/>
+  <arg name="imu_z"    default="0.10"/>
+
+  <!-- URDF 로드 (xacro 파라미터 전달) -->
+  <param name="robot_description"
+         command="$(find xacro)/xacro
+                  '$(find limo_description)/urdf/limo.urdf.xacro'
+                  use_mesh:=$(arg use_mesh)
+                  lidar_x:=$(arg lidar_x)  lidar_z:=$(arg lidar_z)
+                  camera_x:=$(arg camera_x) camera_z:=$(arg camera_z)
+                  imu_x:=$(arg imu_x) imu_z:=$(arg imu_z)"/>
+
+  <!-- 상태 퍼블리셔: 실제 로봇은 joint_state가 고정이라 GUI 없어도 OK -->
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen"/>
+
+  <!-- 시각 확인용 RViz (없어도 됨) -->
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find limo_navigation)/rviz/nav_teb.rviz" required="false" />
+</launch>

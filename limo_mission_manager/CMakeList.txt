@@ -1,0 +1,11 @@
+cmake_minimum_required(VERSION 3.0.2)
+project(limo_mission_manager)
+find_package(catkin REQUIRED)
+catkin_package()
+catkin_install_python(PROGRAMS
+  nodes/mission_manager.py
+  nodes/goal_monitor.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+install(DIRECTORY launch params
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})

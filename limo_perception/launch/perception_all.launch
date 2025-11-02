@@ -1,0 +1,17 @@
+<launch>
+  <!-- 인자 -->
+  <arg name="use_line" default="true"/>
+  <arg name="use_boundary" default="true"/>
+
+  <!-- 라인 트래커 -->
+  <group if="$(arg use_line)">
+    <rosparam file="$(find limo_perception)/params/line_tracker.yaml" command="load"/>
+    <node pkg="limo_perception" type="line_tracker.py" name="line_tracker" output="screen"/>
+  </group>
+
+  <!-- 라이다 경계/장애물 필터 -->
+  <group if="$(arg use_boundary)">
+    <rosparam file="$(find limo_perception)/params/boundary_filter.yaml" command="load"/>
+    <node pkg="limo_perception" type="boundary_from_scan.py" name="boundary_from_scan" output="screen"/>
+  </group>
+</launch>

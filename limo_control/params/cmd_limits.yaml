@@ -1,0 +1,39 @@
+# ===== cmd_limiter 기본 제한 =====
+limits:
+  max_vx: 0.6          # m/s   (전진)
+  max_vx_back: 0.25    # m/s   (후진)
+  max_wz: 1.2          # rad/s
+
+  max_ax: 0.8          # m/s^2 (선형 가속 제한)
+  max_aw: 1.8          # rad/s^2 (각가속 제한)
+
+  deadband_vx: 0.02    # m/s (이하 절삭)
+  deadband_wz: 0.02    # rad/s
+
+  rate: 50.0           # Hz (출력 주기)
+  stale_timeout: 0.3   # s  (입력이 끊기면 정지)
+
+# ===== cmd_mux 소스 정의(우선순위: 숫자 낮을수록 높음) =====
+mux_sources:
+  - {name: emergency, topic: "/cmd_vel/emergency", timeout: 0.2, priority: 0, enabled: true}
+  - {name: teleop,    topic: "/cmd_vel/teleop",    timeout: 0.3, priority: 1, enabled: true}
+  - {name: line,      topic: "/cmd_vel/line",      timeout: 0.3, priority: 2, enabled: true}
+  - {name: nav,       topic: "/cmd_vel/nav",       timeout: 0.5, priority: 3, enabled: true}
+
+mux:
+  output_topic: "/cmd_vel_raw"     # limiter로 보내는 MUX 출력
+  publish_active: "/cmd_mux/active"
+  safety_flag_topic: "/safety_stop"  # safety_stop 노드 Bool 플래그
+  stop_on_safety: true
+
+# ===== safety_stop (LaserScan 기반) =====
+safety:
+  scan_topic: "/scan"
+  frame_id: "base_laser"
+  # 전방 시야(±deg)
+  fov_deg: 60.0
+  # 정지/재개 히스테리시스
+  stop_distance: 0.35     # m : 이 이하로 장애물 -> stop=true
+  resume_distance: 0.40   # m : 이 이상 확보되면 -> stop=false
+  min_valid: 3            # 유효 거리 포인트 최소 개수
+  check_rate: 20.0        # Hz

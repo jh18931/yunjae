@@ -1,0 +1,33 @@
+<launch>
+  <!-- ===== Args (필요시 상위에서 덮어쓰기) ===== -->
+  <arg name="use_imu" default="true"/>
+  <arg name="use_odom" default="true"/>
+  <arg name="publish_tf" default="true"/>
+  <arg name="world_frame" default="odom"/>        <!-- map은 AMCL이 책임 -->
+  <arg name="base_link_frame" default="base_link"/>
+  <arg name="odom_frame" default="odom"/>
+
+  <!-- 파라미터 로드 -->
+  <rosparam file="$(find limo_robot_localization)/params/ekf.yaml" command="load"/>
+
+  <!-- EKF 노드 (odom→base_link) -->
+  <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization" output="screen">
+    <param name="two_d_mode" value="true"/>
+    <param name="publish_tf" value="$(arg publish_tf)"/>
+    <param name="world_frame" value="$(arg world_frame)"/>
+    <param name="base_link_frame" value="$(arg base_link_frame)"/>
+    <param name="odom_frame" value="$(arg odom_frame)"/>
+
+    <!-- 입력 토픽 remap: 우리 스택 표준에 맞춤 -->
+    <remap from="odometry/filtered" to="/odometry/filtered"/>
+    <group if="$(arg use_odom)">
+      <remap from="odom0" to="/odom"/>
+    </group>
+    <group if="$(arg use_imu)">
+      <remap from="imu0" to="/imu/data"/>
+    </group>
+  </node>
+
+  <!-- RViz에서 편하게 보려면 (선택) -->
+  <!-- <node pkg="rviz" type="rviz" name="rviz" required="false"/> -->
+</launch>

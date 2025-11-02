@@ -1,0 +1,44 @@
+# 프레임/기본
+odom_topic: /odometry/filtered
+map_frame: map
+global_frame: map
+
+# 로봇 모델(footprint는 costmap_common과 일치)
+footprint_model:
+  type: "polygon"
+  vertices: [[0.16,0.12],[0.16,-0.12],[-0.16,-0.12],[-0.16,0.12]]
+
+# 속도 제한(실기 안전값)
+max_vel_x: 0.5
+max_vel_x_backwards: 0.2
+max_vel_theta: 1.0
+acc_lim_x: 0.8
+acc_lim_theta: 1.5
+min_turning_radius: 0.0
+
+# 궤적/시간 파라미터
+dt_ref: 0.3
+dt_hysteresis: 0.05
+global_plan_overwrite_orientation: true
+allow_init_with_backwards_motion: false
+feasibility_check_no_poses: 3
+
+# 최적화 가중치 (충돌 여유 ↑)
+weight_obstacle: 100.0
+weight_inflation: 0.2
+min_obstacle_dist: 0.20          # footprint_padding 포함 여유
+include_costmap_obstacles: true
+costmap_obstacles_behind_robot_dist: 0.2
+obstacle_poses_affected: 15
+
+# 경유지/경로 추종
+global_plan_viapoint_sep: 0.7     # 전역 경로 샘플링 간격
+weight_viapoint: 1.0
+
+# 목표(Goal) 접근
+xy_goal_tolerance: 0.10
+yaw_goal_tolerance: 0.15
+free_goal_vel: false
+
+# 로컬/글로벌 프레임 일치
+publish_feedback: false

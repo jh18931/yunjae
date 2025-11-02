@@ -1,0 +1,60 @@
+# 이 파일은 move_base 네임스페이스 하위의 costmap 파라미터를 "추가/재정의"합니다.
+# 핵심은 global/local costmap의 plugins 목록에 "virtual_obstacle_layer"를 더하고,
+# 이 레이어가 /perception/obstacles(PointCloud2) 를 관측원(observation source)으로 쓰도록 하는 것입니다.
+#
+# 주의: 이미 다른 YAML에서 plugins가 정의되어 있으면, "마지막에 로드된 설정"이 최종 적용됩니다.
+# 따라서 launch에서 costmap 기본 YAML을 먼저 로드하고, 이 파일을 "나중에" 로드하세요.
+
+move_base:
+
+  # ===== 공통 기본값(필요시 조정) =====
+  # (여기 값들은 기존 costmap_common.yaml의 값과 충돌되지 않게 최소만 둡니다)
+  transform_tolerance: 0.3
+  footprint: [[0.16, 0.12], [0.16, -0.12], [-0.16, -0.12], [-0.16, 0.12]]
+  footprint_padding: 0.02
+
+  # ===== 글로벌 코스트맵에 가상 레이어 추가 =====
+  global_costmap:
+    # 기존 plugins 목록에 virtual_obstacle_layer를 추가/대체
+    plugins:
+      - {name: static_layer,            type: "costmap_2d::StaticLayer"}
+      - {name: obstacle_layer,          type: "costmap_2d::ObstacleLayer"}
+      - {name: inflation_layer,         type: "costmap_2d::InflationLayer"}
+      - {name: virtual_obstacle_layer,  type: "costmap_2d::ObstacleLayer"}   # ★ 추가
+
+    virtual_obstacle_layer:
+      enabled: true
+      combination_method: 1          # 0:Overwrite, 1:Max, 2:Add (일반적으로 Max)
+      track_unknown_space: true
+      observation_sources: virtual_pc2
+
+      virtual_pc2:
+        data_type: PointCloud2       # ★ PointCloud2를 이벤트 소스로 사용
+        topic: /perception/obstacles # limo_perception/boundary_from_scan 이 퍼블리시
+        expected_update_rate: 0.0    # 0=제한 없음
+        clearing: false              # 비전/라이다 추정은 clearing보다 marking 위주 권장
+        marking: true
+        min_obstacle_height: 0.0
+        max_obstacle_height: 1.5     # 실내 환경 가정
+
+  # ===== 로컬 코스트맵에도 동일하게 추가 =====
+  local_costmap:
+    plugins:
+      - {name: obstacle_layer,          type: "costmap_2d::ObstacleLayer"}
+      - {name: inflation_layer,         type: "costmap_2d::InflationLayer"}
+      - {name: virtual_obstacle_layer,  type: "costmap_2d::ObstacleLayer"}   # ★ 추가
+
+    virtual_obstacle_layer:
+      enabled: true
+      combination_method: 1
+      track_unknown_space: true
+      observation_sources: virtual_pc2
+
+      virtual_pc2:
+        data_type: PointCloud2
+        topic: /perception/obstacles
+        expected_update_rate: 0.0
+        clearing: false
+        marking: true
+        min_obstacle_height: 0.0
+        max_obstacle_height: 1.5

@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>limo_mode_manager</name>
+  <version>0.1.0</version>
+  <description>Operational mode orchestrator for LIMO (NAV/LANE/WALL/PAUSE)</description>
+
+  <maintainer email="you@example.com">Joohee Cho</maintainer>
+  <license>BSD-3-Clause</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>std_srvs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>diagnostic_msgs</exec_depend>
+  <exec_depend>actionlib</exec_depend>
+</package>

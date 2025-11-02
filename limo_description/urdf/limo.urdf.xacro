@@ -1,0 +1,222 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="limo">
+
+  <!-- ====== 기본 파라미터(현장값에 맞게 조정) ====== -->
+  <xacro:property name="use_mesh"         value="false"/>         <!-- true면 meshes/사용 -->
+  <xacro:property name="mesh_dir"         value="$(find limo_description)/meshes"/>
+
+  <!-- 바디 치수/질량 -->
+  <xacro:property name="base_len"         value="0.40"/>          <!-- m -->
+  <xacro:property name="base_wid"         value="0.30"/>
+  <xacro:property name="base_hei"         value="0.12"/>
+  <xacro:property name="base_mass"        value="6.0"/>           <!-- kg (예시) -->
+
+  <!-- 휠/구동 (스키드-디퍼런셜 가정) -->
+  <xacro:property name="wheel_radius"     value="0.050"/>         <!-- 50 mm -->
+  <xacro:property name="wheel_width"      value="0.020"/>
+  <xacro:property name="wheel_sep"        value="0.26"/>          <!-- 좌/우 간격 -->
+  <xacro:property name="wheel_base"       value="0.22"/>          <!-- 전/후 간격 -->
+  <xacro:property name="wheel_mass"       value="0.2"/>
+
+  <!-- 센서 위치(기본값) -->
+  <xacro:property name="lidar_x"          value="0.12"/>
+  <xacro:property name="lidar_z"          value="0.18"/>
+  <xacro:property name="camera_x"         value="0.14"/>
+  <xacro:property name="camera_z"         value="0.20"/>
+  <xacro:property name="imu_x"            value="0.00"/>
+  <xacro:property name="imu_z"            value="0.10"/>
+
+  <!-- 프레임 명칭(상위 bringup과 일치) -->
+  <xacro:property name="map_frame"        value="map"/>
+  <xacro:property name="odom_frame"       value="odom"/>
+  <xacro:property name="base_link"        value="base_link"/>
+  <xacro:property name="base_footprint"   value="base_footprint"/>
+  <xacro:property name="laser_frame"      value="base_laser"/>
+  <xacro:property name="camera_frame"     value="camera_link"/>
+  <xacro:property name="imu_frame"        value="imu_link"/>
+
+  <!-- ====== 유틸 매크로 ====== -->
+  <xacro:macro name="inertial_box" params="mass x y z">
+    <inertial>
+      <mass value="${mass}"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <!-- 직육면체 관성: I = m/12 * diag(y^2+z^2, x^2+z^2, x^2+y^2) -->
+      <inertia ixx="${mass*( (y*y + z*z)/12.0 )}"
+               ixy="0.0" ixz="0.0"
+               iyy="${mass*( (x*x + z*z)/12.0 )}"
+               iyz="0.0"
+               izz="${mass*( (x*x + y*y)/12.0 )}"/>
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="mat" params="name r g b a">
+    <material name="${name}">
+      <color rgba="${r} ${g} ${b} ${a}"/>
+    </material>
+  </xacro:macro>
+  <xacro:mat name="grey"  r="0.6" g="0.6" b="0.6" a="1.0"/>
+  <xacro:mat name="black" r="0.1" g="0.1" b="0.1" a="1.0"/>
+  <xacro:mat name="blue"  r="0.2" g="0.4" b="0.9" a="1.0"/>
+
+  <!-- ====== 링크/조인트 정의 ====== -->
+
+  <!-- 평면 기준 프레임 -->
+  <link name="${base_footprint}">
+    <inertial>
+      <mass value="1e-6"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0.001" rpy="0 0 0"/>
+      <geometry><box size="0.10 0.10 0.002"/></geometry>
+      <material name="blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.0" rpy="0 0 0"/>
+      <geometry><box size="0.10 0.10 0.001"/></geometry>
+    </collision>
+  </link>
+
+  <joint name="footprint_to_base" type="fixed">
+    <parent link="${base_footprint}"/>
+    <child  link="${base_link}"/>
+    <origin xyz="0 0 ${base_hei/2.0}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- 본체 -->
+  <link name="${base_link}">
+    <xacro:inertial_box mass="${base_mass}" x="${base_len}" y="${base_wid}" z="${base_hei}"/>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <xacro:if value="${use_mesh}">
+          <mesh filename="${mesh_dir}/base.dae" scale="1 1 1"/>
+        </xacro:if>
+        <xacro:unless value="${use_mesh}">
+          <box size="${base_len} ${base_wid} ${base_hei}"/>
+        </xacro:unless>
+      </geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><box size="${base_len} ${base_wid} ${base_hei}"/></geometry>
+    </collision>
+  </link>
+
+  <!-- 휠(4개) : 시각화용, 고정조인트(실제 구동은 하드웨어) -->
+  <xacro:macro name="wheel" params="name x y">
+    <link name="${name}">
+      <inertial>
+        <mass value="${wheel_mass}"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <inertia ixx="1e-3" ixy="0" ixz="0" iyy="1e-3" iyz="0" izz="1e-3"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+        <geometry>
+          <xacro:if value="${use_mesh}">
+            <mesh filename="${mesh_dir}/wheel.dae" scale="1 1 1"/>
+          </xacro:if>
+          <xacro:unless value="${use_mesh}">
+            <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+          </xacro:unless>
+        </geometry>
+        <material name="black"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+        <geometry><cylinder radius="${wheel_radius}" length="${wheel_width}"/></geometry>
+      </collision>
+    </link>
+    <joint name="${name}_joint" type="fixed">
+      <parent link="${base_link}"/>
+      <child  link="${name}"/>
+      <origin xyz="${x} ${y} ${-(base_hei/2.0 - wheel_radius)}" rpy="0 0 0"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- 좌우/전후 위치 -->
+  <xacro:wheel name="wheel_fl" x="${ wheel_base/2.0}" y="${  wheel_sep/2.0}"/>
+  <xacro:wheel name="wheel_fr" x="${ wheel_base/2.0}" y="${ -wheel_sep/2.0}"/>
+  <xacro:wheel name="wheel_rl" x="${-wheel_base/2.0}" y="${  wheel_sep/2.0}"/>
+  <xacro:wheel name="wheel_rr" x="${-wheel_base/2.0}" y="${ -wheel_sep/2.0}"/>
+
+  <!-- LiDAR -->
+  <link name="${laser_frame}">
+    <inertial><mass value="0.15"/><origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-4" ixy="0" ixz="0" iyy="1e-4" iyz="0" izz="1e-4"/></inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <xacro:if value="${use_mesh}">
+          <mesh filename="${mesh_dir}/lidar.dae" scale="1 1 1"/>
+        </xacro:if>
+        <xacro:unless value="${use_mesh}">
+          <cylinder radius="0.035" length="0.05"/>
+        </xacro:unless>
+      </geometry>
+      <material name="blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.035" length="0.05"/></geometry>
+    </collision>
+  </link>
+  <joint name="laser_mount" type="fixed">
+    <parent link="${base_link}"/>
+    <child  link="${laser_frame}"/>
+    <origin xyz="${lidar_x} 0 ${lidar_z}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Camera -->
+  <link name="${camera_frame}">
+    <inertial><mass value="0.10"/><origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-4" ixy="0" ixz="0" iyy="1e-4" iyz="0" izz="1e-4"/></inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <xacro:if value="${use_mesh}">
+          <mesh filename="${mesh_dir}/camera.dae" scale="1 1 1"/>
+        </xacro:if>
+        <xacro:unless value="${use_mesh}">
+          <box size="0.04 0.04 0.03"/>
+        </xacro:unless>
+      </geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><box size="0.04 0.04 0.03"/></geometry>
+    </collision>
+  </link>
+  <joint name="camera_mount" type="fixed">
+    <parent link="${base_link}"/>
+    <child  link="${camera_frame}"/>
+    <!-- 카메라는 전방을 보도록 약간 pitch 내려도 됨: rpy="0 0.17 0" 등 -->
+    <origin xyz="${camera_x} 0 ${camera_z}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- IMU -->
+  <link name="${imu_frame}">
+    <inertial><mass value="0.05"/><origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="5e-5" ixy="0" ixz="0" iyy="5e-5" iyz="0" izz="5e-5"/></inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><box size="0.02 0.02 0.02"/></geometry>
+      <material name="blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><box size="0.02 0.02 0.02"/></geometry>
+    </collision>
+  </link>
+  <joint name="imu_mount" type="fixed">
+    <parent link="${base_link}"/>
+    <child  link="${imu_frame}"/>
+    <origin xyz="${imu_x} 0 ${imu_z}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- (옵션) Gazebo/전달기(transmission)는 생략: 실제 구동은 하드웨어가 담당 -->
+</robot>

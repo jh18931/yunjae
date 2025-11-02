@@ -1,0 +1,69 @@
+frequency: 50.0
+sensor_timeout: 0.1
+two_d_mode: true
+transform_time_offset: 0.0
+transform_timeout: 0.0
+print_diagnostics: true
+
+# ===== 프레임 =====
+map_frame: map
+odom_frame: odom
+base_link_frame: base_link
+world_frame: odom      # map은 AMCL이 관리
+
+# ===== ODOM 입력 (보드/바퀴 오돔: /odom) =====
+odom0: /odom
+odom0_differential: false          # 보드가 이미 적분한 pose → 비차분
+odom0_relative: false
+odom0_queue_size: 5
+odom0_nodelay: true
+# [x y z  roll pitch yaw  vx vy vz  wx wy wz  ax ay az]
+odom0_config: [ true, true, false,
+                false, false, true,
+                true, true, false,
+                false, false, true,
+                false, false, false ]
+
+# ===== IMU 입력 (orientation+gyro: /imu/data) =====
+imu0: /imu/data
+imu0_differential: false
+imu0_relative: false
+imu0_queue_size: 10
+imu0_nodelay: true
+imu0_remove_gravitational_acceleration: true
+# orientation(yaw), angular_velocity(z)만 사용
+imu0_config:  [ false, false, false,
+                false, false, true,
+                false, false, false,
+                false, false, true,
+                false, false, false ]
+
+# ===== 초기 공분산 (보수적) =====
+# pose
+initial_estimate_covariance:
+  [
+    1e-1, 0,    0,    0,    0,    0,
+    0,    1e-1, 0,    0,    0,    0,
+    0,    0,    1e+3, 0,    0,    0,
+    0,    0,    0,    1e+3, 0,    0,
+    0,    0,    0,    0,    1e+3, 0,
+    0,    0,    0,    0,    0,    1e-1
+  ]
+
+# 과정 잡음(프로세스 노이즈): yaw, x,y 비교적 낮춤 / z, roll,pitch 큼
+process_noise_covariance:
+  [
+    1e-2, 0,    0,    0,    0,    0,
+    0,    1e-2, 0,    0,    0,    0,
+    0,    0,    1e+1, 0,    0,    0,
+    0,    0,    0,    1e+1, 0,    0,
+    0,    0,    0,    0,    1e+1, 0,
+    0,    0,    0,    0,    0,    5e-3
+  ]
+
+# 측정 노이즈(센서 신뢰도 반영; 필요시 현장 튜닝)
+# 오돔(속도/yaw)과 IMU(yaw/yaw-rate)의 상대 가중치를 여기로 조절
+odom0_pose_rejection_threshold: 5.0
+odom0_twist_rejection_threshold: 5.0
+imu0_pose_rejection_threshold: 5.0
+imu0_twist_rejection_threshold: 5.0

@@ -1,0 +1,11 @@
+waypoints:
+  - name: "START"
+    pose: {x: 0.50, y: 0.20, yaw: 0.0}
+  - name: "GATE_A"
+    pose: {x: 2.30, y: 0.25, yaw: 1.57}
+  - name: "OBST_ZONE"
+    pose: {x: 2.60, y: -0.80, yaw: 3.14}
+  - name: "CHECK_P"
+    pose: {x: 1.20, y: -1.10, yaw: -1.57}
+  - name: "FINISH"
+    pose: {x: 0.60, y: -0.20, yaw: 0.0}

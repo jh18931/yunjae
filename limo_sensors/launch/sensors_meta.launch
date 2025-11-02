@@ -1,0 +1,24 @@
+<launch>
+  <rosparam file="$(find limo_sensors)/params/profile_default.yaml" command="load"/>
+
+  <!-- args -->
+  <arg name="mode" default="full"/>   <!-- full|minimal|lidar_only|camera_only|off -->
+  <arg name="prefer_usb_cam" default="false"/>
+  <arg name="lidar_type" default="$(param lidar.lidar_type)"/>
+
+  <!-- camera -->
+  <group if="$(eval arg('mode') in ['full','camera_only'])">
+    <include file="$(find limo_sensors)/launch/camera.launch">
+      <arg name="prefer_usb_cam" value="$(arg prefer_usb_cam)"/>
+    </include>
+  </group>
+
+  <!-- lidar -->
+  <group if="$(eval arg('mode') in ['full','minimal','lidar_only'])">
+    <include file="$(find limo_sensors)/launch/lidar.launch">
+      <arg name="lidar_type" value="$(arg lidar_type)"/>
+    </include>
+  </group>
+
+  <!-- off = 아무 것도 안 띄움 -->
+</launch>

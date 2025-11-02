@@ -1,0 +1,31 @@
+# ==== 프레임 이름(전체 스택과 일치하도록 유지) ====
+frames:
+  map: map
+  odom: odom
+  base_link: base_link
+  base_footprint: base_footprint
+  laser: base_laser
+  camera: camera_link
+  imu: imu_link
+
+# ==== 센서 외부 파라미터(정적 TF) ====
+# 단위: m, rad  (RPY는 라디안!)
+extrinsics:
+  # base_link → base_laser
+  laser:
+    xyz: [0.16, 0.0, 0.18]     # 앞쪽 장착 + 높이(예시)
+    rpy: [0.0, 0.0, 0.0]
+
+  # base_link → camera_link
+  camera:
+    xyz: [0.18, 0.0, 0.22]
+    rpy: [0.0, 0.0, 0.0]       # 살짝 하향은 roll/pitch 중 pitch(예: 0.17rad)
+
+  # base_link → imu_link (무게중심 근처)
+  imu:
+    xyz: [0.00, 0.0, 0.10]
+    rpy: [0.0, 0.0, 0.0]
+
+# ==== map↔odom 처리는 보통 AMCL/EKF가 담당 ====
+# 테스트용으로만 true (기본 false)
+identity_map_to_odom: false

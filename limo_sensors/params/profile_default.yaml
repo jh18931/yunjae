@@ -1,0 +1,9 @@
+camera:
+  width: 640
+  height: 480
+  fps: 30
+  publish_compressed: true
+
+lidar:
+  lidar_type: "rplidar"         # 기본값: rplidar
+  serial_baudrate: 115200

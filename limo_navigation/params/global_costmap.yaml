@@ -1,0 +1,14 @@
+move_base:
+  global_costmap:
+    global_frame: map
+    robot_base_frame: base_link
+    rolling_window: false
+    track_unknown_space: true
+    resolution: 0.05
+    inflation_layer:
+      inflation_radius: 0.65
+      cost_scaling_factor: 3.0
+    plugins:
+      - {name: static_layer,    type: "costmap_2d::StaticLayer"}
+      - {name: obstacle_layer,  type: "costmap_2d::ObstacleLayer"}
+      - {name: inflation_layer, type: "costmap_2d::InflationLayer"}

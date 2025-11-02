@@ -1,0 +1,11 @@
+<launch>
+  <rosparam file="$(find ugv_sdk)/params/ugv_sdk.yaml" command="load"/>
+
+  <arg name="port" default="$(arg port)"/>
+  <arg name="baudrate" default="$(arg baudrate)"/>
+
+  <node pkg="ugv_sdk" type="ugv_sdk_node" name="ugv_sdk_node" output="screen">
+    <param name="port" value="$(optenv UGV_PORT $(env port /dev/ttyUSB0))"/>
+    <param name="baudrate" value="$(optenv UGV_BAUD $(env baudrate 115200))"/>
+  </node>
+</launch>

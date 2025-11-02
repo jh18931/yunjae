@@ -1,0 +1,22 @@
+<launch>
+  <arg name="map_file" default="$(find limo_maps)/maps/lab_obstacle_map.yaml"/>
+  <arg name="base_frame" default="base_link"/>
+  <arg name="odom_frame" default="odom"/>
+  <arg name="global_frame" default="map"/>
+  <arg name="scan_topic" default="/scan"/>
+  <arg name="use_sim_time" default="false"/>
+
+  <param name="use_sim_time" value="$(arg use_sim_time)"/>
+
+  <node pkg="map_server" type="map_server" name="map_server" args="$(arg map_file)" output="screen"/>
+
+  <rosparam file="$(find limo_navigation)/params/amcl.yaml" command="load"/>
+  <node pkg="amcl" type="amcl" name="amcl" output="screen">
+    <param name="base_frame_id" value="$(arg base_frame)"/>
+    <param name="odom_frame_id" value="$(arg odom_frame)"/>
+    <param name="global_frame_id" value="$(arg global_frame)"/>
+    <remap from="scan" to="$(arg scan_topic)"/>
+  </node>
+
+  <include file="$(find limo_navigation)/launch/rviz_nav.launch"/>
+</launch>

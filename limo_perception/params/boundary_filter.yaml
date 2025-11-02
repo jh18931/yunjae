@@ -1,0 +1,27 @@
+# ===== 입력 LaserScan =====
+scan_topic: "/scan"
+laser_frame: "base_laser"
+
+# ===== 전방 FOV/범위 =====
+fov_deg: 120.0            # ±60°
+range_min: 0.05
+range_max: 8.0
+
+# ===== 포인트클라우드/마커 출력 =====
+obstacles_topic: "/perception/obstacles"   # sensor_msgs/PointCloud2
+markers_topic:   "/perception/markers"     # visualization_msgs/MarkerArray
+nearest_topic:   "/perception/nearest"     # std_msgs/Float32 (m)
+blocked_topic:   "/perception/blocked"     # std_msgs/Bool
+
+# ===== 차선-같은 경계 추출(간단한 필터) =====
+downsample_step: 2         # 스캔 점 샘플링 간격
+cluster_dist: 0.20         # 인접점 최대 거리(클러스터 분할)
+min_cluster_size: 3
+
+# ===== 안전 판단 =====
+stop_distance: 0.40        # 이내면 blocked=true
+resume_distance: 0.45
+
+# ===== 속도 =====
+rate: 20.0
+diag_rate: 1.0

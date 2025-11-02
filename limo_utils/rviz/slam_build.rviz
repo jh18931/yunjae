@@ -1,0 +1,50 @@
+Panels:
+  - Class: rviz/Displays
+    Name: Displays
+  - Class: rviz/Time
+    Name: Time
+  - Class: rviz/Views
+    Name: Views
+Visualization Manager:
+  Global Options:
+    Fixed Frame: odom
+    Background Color: 48; 48; 48
+  Displays:
+    - Class: rviz/TF
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+    - Class: rviz/LaserScan
+      Name: Scan
+      Topic: /scan
+      Size (m): 0.03
+      Color: 0; 255; 0
+    - Class: rviz/Map
+      Name: Map (building)
+      Topic: /map
+      Alpha: 0.9
+    - Class: rviz/RobotModel
+      Name: Robot
+    - Class: rviz/Path
+      Name: EKF Path (optional)
+      Topic: /odometry/filtered
+      Enabled: false
+    - Class: rviz/Pose
+      Name: Initial Pose (tool target)
+      Shape: Axes
+      Axes Length: 0.5
+      Axes Radius: 0.02
+      Topic: /initialpose
+      Enabled: false
+  Tools:
+    - Class: rviz/Interact
+    - Class: rviz/SetInitialPose
+    - Class: rviz/Measure
+  Views:
+    Current:
+      Class: rviz/TopDownOrtho
+      Near Clip Distance: 0.01
+      Scale: 50
+      Angle: 0
+      X: 0
+      Y: 0

@@ -1,0 +1,31 @@
+frames:
+  map: map
+  odom: odom
+  base_link: base_link
+  laser: base_laser
+  camera: camera_link
+
+limits:
+  max_vel_x: 0.6
+  max_vel_theta: 1.2
+  acc_lim_x: 0.8
+  acc_lim_theta: 1.5
+
+footprint:
+  type: polygon
+  vertices: [[0.20,0.15],[0.20,-0.15],[-0.20,-0.15],[-0.20,0.15]]
+
+topics:
+  cmd_out: /cmd_vel
+  cmd_nav: /cmd_vel/nav
+  cmd_line: /cmd_vel/line
+  cmd_wall: /cmd_vel/wall
+  cmd_boundary: /cmd_vel/boundary
+  cmd_teleop: /cmd_vel/teleop
+  scan: /scan
+  imu: /imu/data
+  odom_raw: /odom
+
+diagnostics:
+  warn_missing_devices: true
+  devices: [/dev/video0, /dev/ttyUSB0]

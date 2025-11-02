@@ -1,0 +1,35 @@
+<launch>
+  <!-- ===== Args ===== -->
+  <arg name="scan_topic"    default="/scan"/>
+  <arg name="base_frame"    default="base_link"/>
+  <arg name="odom_frame"    default="odom"/>
+  <arg name="map_frame"     default="map"/>
+  <arg name="use_sim_time"  default="false"/>
+  <arg name="throttle_hz"   default="0.0"/>   <!-- >0 이면 스캔 쓰로틀 -->
+  <arg name="tf_delay"      default="0.05"/>
+
+  <param name="use_sim_time" value="$(arg use_sim_time)"/>
+
+  <!-- 파라미터 로드 -->
+  <rosparam file="$(find limo_slam_gmapping)/params/gmapping.yaml" command="load"/>
+
+  <!-- (선택) 스캔 쓰로틀 -->
+  <group if="$(eval float(arg('throttle_hz')) > 0.0)">
+    <node pkg="topic_tools" type="throttle" name="scan_throttle" output="screen" args="messages $(arg scan_topic) $(arg throttle_hz) /scan_throttled"/>
+    <arg name="scan_topic" value="/scan_throttled"/>
+  </group>
+
+  <!-- GMapping Node -->
+  <node pkg="slam_gmapping" type="slam_gmapping" name="slam_gmapping" output="screen">
+    <!-- 프레임 지정 -->
+    <param name="base_frame" value="$(arg base_frame)"/>
+    <param name="odom_frame" value="$(arg odom_frame)"/>
+    <param name="map_frame"  value="$(arg map_frame)"/>
+    <param name="tf_delay"   value="$(arg tf_delay)"/>
+
+    <!-- 파라미터는 YAML에서 로드됨 -->
+    <remap from="scan" to="$(arg scan_topic)"/>
+  </node>
+
+  <!-- (선택) RViz는 상위 bringup에서 띄우는 걸 권장 -->
+</launch>

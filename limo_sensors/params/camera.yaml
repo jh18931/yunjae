@@ -1,0 +1,9 @@
+device: "/dev/video0"
+frame_id: "camera_link"
+width: 640
+height: 480
+fps: 30
+pixel_format: "MJPG"          # "YUYV", "MJPG" 등 (OpenCV 경로에서는 참고용)
+publish_compressed: true
+flip_horizontal: false
+flip_vertical: false

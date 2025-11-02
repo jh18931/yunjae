@@ -1,0 +1,137 @@
+<launch>
+  <!-- ===== 공통 옵션 ===== -->
+  <arg name="use_sim_time" default="false"/>
+  <param name="use_sim_time" value="$(arg use_sim_time)"/>
+
+  <arg name="robot_ns" default=""/>
+  <group ns="$(arg robot_ns)">
+
+    <!-- ===== 프레임/토픽 표준 ===== -->
+    <rosparam file="$(find limo_bringup)/params/base.yaml" command="load"/>
+
+    <arg name="base_frame" default="$(optenv FR_BASE_LINK base_link)"/>
+    <arg name="odom_frame" default="$(optenv FR_ODOM odom)"/>
+    <arg name="map_frame"  default="$(optenv FR_MAP map)"/>
+
+    <!-- ===== 기능 토글 ===== -->
+    <arg name="enable_tf_static"   default="true"/>
+    <arg name="enable_sensors"     default="full"/>  <!-- minimal | full | none -->
+    <arg name="enable_ekf"         default="true"/>
+    <arg name="enable_navigation"  default="false"/>
+    <arg name="enable_mission"     default="false"/>
+    <arg name="enable_mode_manager" default="true"/>
+    <arg name="enable_perception"  default="true"/>
+    <arg name="enable_cmd_chain"   default="true"/>  <!-- mux + safety + limiter -->
+
+    <!-- ===== URDF / TF ===== -->
+    <arg name="urdf_file" default="$(find limo_description)/urdf/limo.urdf.xacro"/>
+    <param name="robot_description" command="$(find xacro)/xacro $(arg urdf_file)"/>
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher"/>
+
+    <group if="$(arg enable_tf_static)">
+      <include file="$(find limo_tf)/launch/tf_static.launch">
+        <arg name="base_frame" value="$(arg base_frame)"/>
+        <arg name="odom_frame" value="$(arg odom_frame)"/>
+        <arg name="map_frame"  value="$(arg map_frame)"/>
+      </include>
+    </group>
+
+    <!-- ===== 장치 점검 (경고만) ===== -->
+    <node pkg="limo_bringup" type="check_devices.py" name="check_devices" output="screen">
+      <param name="rate_hz" value="1.0"/>
+      <param name="warn_missing" value="true"/>
+      <rosparam param="devices">[/dev/video0, /dev/ttyUSB0]</rosparam>
+    </node>
+
+    <!-- ===== 하드웨어 드라이버(LIMO 전용) ===== -->
+    <arg name="base_port"     default="/dev/ttyUSB0"/>
+    <arg name="base_baudrate" default="115200"/>
+    <arg name="drive_mode"    default="differential"/>  <!-- differential|ackermann|mecanum -->
+
+    <include file="$(find ugv_sdk)/launch/ugv_sdk.launch">
+      <arg name="port" value="$(arg base_port)"/>
+      <arg name="baudrate" value="$(arg base_baudrate)"/>
+    </include>
+
+    <include file="$(find limo_base)/launch/limo_base.launch">
+      <arg name="odom_frame"      value="$(arg odom_frame)"/>
+      <arg name="base_link_frame" value="$(arg base_frame)"/>
+      <arg name="enable_imu"      value="true"/>
+      <arg name="publish_tf"      value="true"/>
+      <arg name="drive_mode"      value="$(arg drive_mode)"/>
+    </include>
+
+    <!-- ===== 센서 Bringup ===== -->
+    <group if="$(eval arg('enable_sensors') == 'minimal')">
+      <include file="$(find limo_bringup)/launch/sensors_minimal.launch"/>
+    </group>
+    <group if="$(eval arg('enable_sensors') == 'full')">
+      <include file="$(find limo_bringup)/launch/sensors_full.launch"/>
+    </group>
+
+    <!-- ===== EKF (odom→base_link 융합) ===== -->
+    <group if="$(arg enable_ekf)">
+      <include file="$(find limo_robot_localization)/launch/ekf_localization.launch"/>
+    </group>
+
+    <!-- ===== Perception / Mode Manager (라인/경계/맵 모드 전환) ===== -->
+    <group if="$(arg enable_perception)">
+      <include file="$(find limo_perception)/launch/perception_all.launch"/>
+    </group>
+    <group if="$(arg enable_mode_manager)">
+      <include file="$(find limo_mode_manager)/launch/mode_manager.launch"/>
+    </group>
+
+    <!-- ===== 명령 체인: MUX → Safety → Limiter → /cmd_vel ===== -->
+    <group if="$(arg enable_cmd_chain)">
+      <!-- 입력 표준 토픽 -->
+      <arg name="cmd_nav"      default="/cmd_vel/nav"/>
+      <arg name="cmd_line"     default="/cmd_vel/line"/>
+      <arg name="cmd_wall"     default="/cmd_vel/wall"/>
+      <arg name="cmd_boundary" default="/cmd_vel/boundary"/>
+      <arg name="cmd_teleop"   default="/cmd_vel/teleop"/>
+      <arg name="cmd_muxed"    default="/cmd_vel/muxed"/>
+      <arg name="cmd_safe"     default="/cmd_vel/safe"/>
+      <arg name="cmd_out"      default="/cmd_vel"/>
+
+      <node pkg="limo_control" type="cmd_mux.py" name="cmd_mux" output="screen">
+        <remap from="~cmd_nav"      to="$(arg cmd_nav)"/>
+        <remap from="~cmd_line"     to="$(arg cmd_line)"/>
+        <remap from="~cmd_wall"     to="$(arg cmd_wall)"/>
+        <remap from="~cmd_boundary" to="$(arg cmd_boundary)"/>
+        <remap from="~cmd_teleop"   to="$(arg cmd_teleop)"/>
+        <remap from="~cmd_out"      to="$(arg cmd_muxed)"/>
+        <param name="default_source" value="nav"/>
+        <param name="mode_topic" value="/limo/mode"/>
+      </node>
+
+      <node pkg="limo_control" type="safety_stop.py" name="safety_stop" output="screen">
+        <remap from="~cmd_in" to="$(arg cmd_muxed)"/>
+        <remap from="~cmd_out" to="$(arg cmd_safe)"/>
+        <remap from="~scan" to="/scan"/>
+        <param name="stop_distance" value="0.35"/>
+        <param name="brake_time" value="0.2"/>
+      </node>
+
+      <node pkg="limo_control" type="cmd_limiter.py" name="cmd_limiter" output="screen">
+        <remap from="~cmd_in" to="$(arg cmd_safe)"/>
+        <remap from="~cmd_out" to="$(arg cmd_out)"/>
+        <rosparam file="$(find limo_control)/params/cmd_limits.yaml" command="load"/>
+      </node>
+    </group>
+
+    <!-- ===== Navigation / Mission (필요 시) ===== -->
+    <group if="$(arg enable_navigation)">
+      <include file="$(find limo_navigation)/launch/nav_with_map.launch"/>
+    </group>
+    <group if="$(arg enable_mission)">
+      <include file="$(find limo_mission_manager)/launch/loop_mission.launch"/>
+    </group>
+
+    <!-- ===== rosbag (선택) : 재현성 향상 ===== -->
+    <!--
+    <node pkg="rosbag" type="record" name="bag_record" output="screen" required="false"
+          args="-o $(env HOME)/bags/limo_sess /odom /imu/data /scan /cmd_vel /limo/mode"/>
+    -->
+  </group>
+</launch>

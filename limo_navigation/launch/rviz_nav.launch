@@ -1,0 +1,4 @@
+<launch>
+  <arg name="rviz_cfg" default="$(find limo_navigation)/rviz/nav_teb.rviz"/>
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(arg rviz_cfg)" required="false"/>
+</launch>

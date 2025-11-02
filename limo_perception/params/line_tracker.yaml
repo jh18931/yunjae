@@ -1,0 +1,52 @@
+# ===== 입력/출력 토픽 =====
+image_topic: "/camera/image_raw"      # 또는 "/camera/image_raw/compressed"
+compressed: false                      # true면 CompressedImage 구독
+frame_id: "camera_link"
+
+# ===== ROI (이미지 하부만 사용) =====
+use_roi: true
+roi_top_ratio: 0.55        # 화면 높이의 55% 지점부터 하단 사용
+
+# ===== 색상 임계(HSV) : 노란선/흰선 겸용 =====
+# (현장 조명에 따라 튜닝; 두 범위를 합쳐 사용)
+yellow_hsv:
+  h_min: 18;  h_max: 40
+  s_min: 60;  s_max: 255
+  v_min: 80;  v_max: 255
+
+white_hsv:
+  h_min: 0;   h_max: 180
+  s_min: 0;   s_max: 40
+  v_min: 200; v_max: 255
+
+# ===== 형상/엣지 처리 =====
+blur_ksize: 5
+morph_ksize: 5
+canny_low: 60
+canny_high: 150
+hough_rho: 1
+hough_theta_deg: 1.0
+hough_thresh: 40
+hough_min_len: 40
+hough_max_gap: 20
+
+# ===== 라인 중앙값/오차 계산 =====
+lane_method: "histogram"   # "histogram" | "hough"
+min_contour_area: 200
+
+# ===== 제어 출력 =====
+publish_cmd_vel: true
+cmd_topic: "/cmd_vel/line"
+lookahead_px: 120          # 영상 상 lookahead 거리(픽셀)
+k_yaw: 0.015               # 조향(각속도) 게인
+k_lat: 0.002               # 횡오차 게인
+vx_feedforward: 0.20       # 기본 전진속도 [m/s]
+vx_min: 0.10
+vx_max: 0.35
+wz_max: 1.0
+
+# ===== 보조 출력 =====
+publish_path: true
+path_topic: "/path/line"
+diag_rate: 1.0             # Hz
+viz_topic: "/line_tracker/markers"

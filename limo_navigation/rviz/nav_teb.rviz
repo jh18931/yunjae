@@ -1,0 +1,46 @@
+Panels:
+  - Class: rviz/Displays
+    Name: Displays
+  - Class: rviz/Time
+    Name: Time
+Visualization Manager:
+  Global Options:
+    Fixed Frame: map
+    Background Color: 48; 48; 48
+  Displays:
+    - Class: rviz/TF
+      Name: TF
+      Show Arrows: true
+    - Class: rviz/Map
+      Name: Map
+      Topic: /map
+      Alpha: 0.7
+    - Class: rviz/RobotModel
+      Name: Robot
+    - Class: rviz/Path
+      Name: Global Plan
+      Topic: /move_base/GlobalPlanner/plan
+      Color: 25; 255; 240
+    - Class: rviz/Path
+      Name: Local Plan
+      Topic: /move_base/TebLocalPlannerROS/local_plan
+      Color: 255; 25; 25
+    - Class: rviz/MarkerArray
+      Name: TEB Obstacles
+      Topic: /move_base/TebLocalPlannerROS/teb_markers
+    - Class: rviz/LaserScan
+      Name: Scan
+      Topic: /scan
+      Size (m): 0.03
+      Color: 0; 255; 0
+    - Class: rviz/Polygon
+      Name: Footprint
+      Topic: /move_base/local_costmap/footprint
+  Tools:
+    - Class: rviz/Interact
+    - Class: rviz/SetInitialPose
+    - Class: rviz/SetGoal
+  Views:
+    Current:
+      Class: rviz/Orbit
+      Distance: 8

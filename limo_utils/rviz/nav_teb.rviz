@@ -1,0 +1,82 @@
+Panels:
+  - Class: rviz/Displays
+    Name: Displays
+  - Class: rviz/Time
+    Name: Time
+  - Class: rviz/Views
+    Name: Views
+Visualization Manager:
+  Global Options:
+    Fixed Frame: map
+    Background Color: 48; 48; 48
+  Displays:
+    - Class: rviz/TF
+      Name: TF
+      Show Arrows: false
+      Show Axes: false
+    - Class: rviz/Map
+      Name: Static Map
+      Topic: /map
+      Alpha: 0.8
+    - Class: rviz/RobotModel
+      Name: Robot
+    - Class: rviz/LaserScan
+      Name: Scan
+      Topic: /scan
+      Size (m): 0.03
+      Color: 0; 255; 0
+    - Class: rviz/Path
+      Name: Global Plan
+      Topic: /move_base/GlobalPlanner/plan
+      Color: 0; 255; 255
+    - Class: rviz/Path
+      Name: Local Plan (TEB)
+      Topic: /move_base/TebLocalPlannerROS/local_plan
+      Color: 255; 50; 50
+    - Class: rviz/Polygon
+      Name: Local Footprint
+      Topic: /move_base/local_costmap/footprint
+      Color: 255; 255; 0
+    - Class: rviz/Map
+      Name: Global Costmap (debug)
+      Topic: /move_base/global_costmap/costmap
+      Alpha: 0.5
+      Enabled: false
+    - Class: rviz/Map
+      Name: Local Costmap (debug)
+      Topic: /move_base/local_costmap/costmap
+      Alpha: 0.6
+      Enabled: false
+    - Class: rviz/MarkerArray
+      Name: TEB Obstacles
+      Topic: /move_base/TebLocalPlannerROS/teb_markers
+      Enabled: false
+    - Class: rviz/PoseWithCovariance
+      Name: AMCL Pose
+      Topic: /amcl_pose
+      Color: 50; 200; 255
+      Alpha: 1
+    - Class: rviz/PoseArray
+      Name: AMCL Particles
+      Topic: /particlecloud
+      Color: 255; 255; 255
+      Alpha: 0.5
+    - Class: rviz/Marker
+      Name: Mission Waypoints
+      Topic: /mission/waypoints_markers
+    - Class: rviz/Path
+      Name: Line Tracker Path
+      Topic: /path/line
+      Color: 255; 200; 0
+      Enabled: false
+  Tools:
+    - Class: rviz/Interact
+    - Class: rviz/SetInitialPose
+    - Class: rviz/SetGoal
+    - Class: rviz/Measure
+  Views:
+    Current:
+      Class: rviz/Orbit
+      Distance: 8
+      Pitch: 0.5
+      Yaw: 0.0

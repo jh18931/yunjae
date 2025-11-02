@@ -1,0 +1,31 @@
+<launch>
+  <!-- 외부에서 덮어쓸 수 있게 arg 제공 -->
+  <arg name="base_frame" default="base_link"/>
+  <arg name="odom_frame" default="odom"/>
+  <arg name="map_frame"  default="map"/>
+
+  <!-- 파라미터 로드 -->
+  <rosparam file="$(find limo_tf)/params/frames.yaml" command="load"/>
+
+  <!-- === map→odom (테스트용: 기본 꺼둠) === -->
+  <group if="$(eval param('identity_map_to_odom'))">
+    <!-- 0 0 0 0 0 0 로 정적 연결: 실제 운용에선 끄고 AMCL/EKF에 맡기기 -->
+    <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom_static"
+          args="0 0 0 0 0 0 $(arg map_frame) $(arg odom_frame)"/>
+  </group>
+
+  <!-- === base_link → base_laser / imu_link === -->
+  <node pkg="limo_tf" type="base_tf_broadcaster.py" name="base_tf_broadcaster" output="screen">
+    <param name="base_frame" value="$(arg base_frame)"/>
+    <rosparam param="frames">$(param frames)</rosparam>
+    <rosparam param="extrinsics">$(param extrinsics)</rosparam>
+  </node>
+
+  <!-- === base_link → camera_link === -->
+  <node pkg="limo_tf" type="camera_tf_broadcaster.py" name="camera_tf_broadcaster" output="screen">
+    <param name="base_frame" value="$(arg base_frame)"/>
+    <rosparam param="frames">$(param frames)</rosparam>
+    <rosparam param="extrinsics">$(param extrinsics)</rosparam>
+  </node>
+
+</launch>

@@ -1,0 +1,9 @@
+<launch>
+  <arg name="lidar_port" default="/dev/ttyUSB0"/>
+  <arg name="lidar_baud" default="115200"/>
+
+  <include file="$(find limo_sensors)/launch/lidar.launch">
+    <arg name="port" value="$(arg lidar_port)"/>
+    <arg name="baudrate" value="$(arg lidar_baud)"/>
+  </include>
+</launch>

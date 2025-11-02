@@ -1,0 +1,49 @@
+<launch>
+  <!-- ===== 데모 인자 ===== -->
+  <arg name="map_file" default="$(find limo_maps)/maps/lab_obstacle_map.yaml"/>
+  <arg name="scan_topic" default="/scan"/>
+  <arg name="use_sim_time" default="false"/>
+  <param name="use_sim_time" value="$(arg use_sim_time)"/>
+
+  <!-- 가상 장애물 레이어가 참조할 PointCloud2를 실제로 만들어주는 노드(옵션):
+       여기서는 limo_perception/boundary_from_scan.py를 함께 켜서
+       /scan → /perception/obstacles(PC2) 로 변환하도록 합니다. -->
+  <group>
+    <rosparam file="$(find limo_perception)/params/boundary_filter.yaml" command="load"/>
+    <node pkg="limo_perception" type="boundary_from_scan.py" name="boundary_from_scan" output="screen">
+      <param name="scan_topic" value="$(arg scan_topic)"/>
+      <!-- stop/resume 거리는 안전정지 정책과 일치시키세요 -->
+    </node>
+  </group>
+
+  <!-- ===== 지도 + AMCL ===== -->
+  <node pkg="map_server" type="map_server" name="map_server" args="$(arg map_file)" output="screen"/>
+  <rosparam file="$(find limo_navigation)/params/amcl.yaml" command="load"/>
+  <node pkg="amcl" type="amcl" name="amcl" output="screen">
+    <param name="base_frame_id" value="base_link"/>
+    <param name="odom_frame_id" value="odom"/>
+    <param name="global_frame_id" value="map"/>
+    <remap from="scan" to="$(arg scan_topic)"/>
+  </node>
+
+  <!-- ===== move_base =====
+       기본 코스트맵/TEB 설정을 먼저 로드한 뒤, 맨 마지막에 virtual_layer.yaml 로
+       plugins 항목을 "덮어써서" 가상 레이어를 추가합니다. -->
+  <rosparam file="$(find limo_navigation)/params/costmap_common.yaml" command="load" ns="move_base"/>
+  <rosparam file="$(find limo_navigation)/params/global_costmap.yaml" command="load" ns="move_base"/>
+  <rosparam file="$(find limo_navigation)/params/local_costmap.yaml"  command="load" ns="move_base"/>
+  <rosparam file="$(find limo_navigation)/params/teb_local_planner.yaml" command="load" ns="move_base"/>
+
+  <!-- ★ 가상 장애물 레이어 추가(마지막에 로드해야 plugins 리스트가 반영됨) -->
+  <rosparam file="$(find limo_costmap_plugins)/params/virtual_layer.yaml" command="load"/>
+
+  <node pkg="move_base" type="move_base" name="move_base" output="screen">
+    <rosparam param="base_local_planner">teb_local_planner/TebLocalPlannerROS</rosparam>
+    <param name="planner_frequency" value="1.0"/>
+    <param name="controller_frequency" value="10.0"/>
+    <remap from="cmd_vel" to="/cmd_vel/nav"/>
+  </node>
+
+  <!-- RViz(선택) -->
+  <include file="$(find limo_navigation)/launch/rviz_nav.launch"/>
+</launch>

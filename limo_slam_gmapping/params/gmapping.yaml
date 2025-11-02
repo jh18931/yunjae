@@ -1,0 +1,42 @@
+# ========== Laser / Motion model ==========
+maxUrange: 8.0          # 레이저 최대 사용거리 (m)
+maxRange:  12.0         # 라이다 스펙 상 최대 (필요시 증가)
+sigma: 0.05
+kernelSize: 1
+lstep: 0.05
+astep: 0.05
+iterations: 5
+lsigma: 0.075
+ogain: 3.0
+lskip: 0                 # 스캔 포인트 스킵 (성능문제 시 1~3)
+
+# 모션 모델 (노면/감속기 진동 대비)
+srr: 0.1    # m -> m  노이즈
+srt: 0.2    # rad    (직진→회전 오차)
+str: 0.1
+stt: 0.2
+
+# ========== Update triggers ==========
+linearUpdate: 0.15       # (m)
+angularUpdate: 0.15      # (rad)
+temporalUpdate: 3.0      # (s) 움직임 없을 때도 갱신
+
+# resampling / particles
+resampleThreshold: 0.5
+particles: 40            # LIMO 실내 기준 충분
+
+# ========== Map / grid ==========
+xmin: -20.0
+ymin: -20.0
+xmax:  20.0
+ymax:  20.0
+delta: 0.05              # 해상도 5cm
+
+# likelihood sampling
+llsamplerange: 0.01
+llsamplestep: 0.01
+lasamplerange: 0.005
+lasamplestep: 0.005
+
+# For TF sync
+tf_delay: 0.05

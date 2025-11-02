@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>limo_sensors</name>
+  <version>0.1.0</version>
+  <description>LIMO camera & lidar bringup (meta-launch + wrappers)</description>
+
+  <maintainer email="you@example.com">Joohee Cho</maintainer>
+  <license>BSD-3-Clause</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>roslaunch</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>diagnostic_msgs</exec_depend>
+  <exec_depend>image_transport</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
+  <exec_depend>compressed_image_transport</exec_depend>
+
+  <!-- 벤더/대체 드라이버가 있을 경우(선택) -->
+  <exec_depend>usb_cam</exec_depend>
+  <exec_depend>rplidar_ros</exec_depend>
+  <exec_depend>ydlidar_ros</exec_depend>
+</package>

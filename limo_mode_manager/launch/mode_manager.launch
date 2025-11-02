@@ -1,0 +1,28 @@
+<launch>
+  <!-- 초기 모드: NAV_MAP | LINE_FOLLOW | WALL_BOUNDARY | PAUSE -->
+  <arg name="initial_mode" default="PAUSE"/>
+
+  <!-- 통합에 필요한 토픽/서비스 이름 (필요시 상위에서 덮어쓰기) -->
+  <arg name="mode_topic" default="/limo/mode"/>
+  <arg name="mission_pause_srv" default="/mission/pause"/>
+  <arg name="cmd_mux_active_topic" default="/cmd_mux/active"/>
+  <arg name="blocked_topic" default="/perception/blocked"/>     <!-- boundary_from_scan -->
+  <arg name="safety_flag_topic" default="/safety_stop"/>        <!-- safety_stop 노드 -->
+  <arg name="line_cmd_topic" default="/cmd_vel/line"/>
+  <arg name="nav_cmd_topic"  default="/cmd_vel/nav"/>
+
+  <node pkg="limo_mode_manager" type="mode_manager.py" name="mode_manager" output="screen">
+    <param name="initial_mode" value="$(arg initial_mode)"/>
+    <param name="mode_topic" value="$(arg mode_topic)"/>
+    <param name="mission_pause_srv" value="$(arg mission_pause_srv)"/>
+    <param name="cmd_mux_active_topic" value="$(arg cmd_mux_active_topic)"/>
+    <param name="blocked_topic" value="$(arg blocked_topic)"/>
+    <param name="safety_flag_topic" value="$(arg safety_flag_topic)"/>
+    <param name="line_cmd_topic" value="$(arg line_cmd_topic)"/>
+    <param name="nav_cmd_topic"  value="$(arg nav_cmd_topic)"/>
+
+    <!-- 정책: 차선모드에서 blocked면 일시적으로 NAV_MAP로 폴백하는 옵션 -->
+    <param name="fallback_nav_on_blocked" value="true"/>
+    <param name="fallback_cooldown" value="3.0"/>  <!-- 초, 해제 대기 -->
+  </node>
+</launch>

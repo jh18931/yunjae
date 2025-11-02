@@ -1,0 +1,32 @@
+# 공통 프레임
+global_frame: map
+robot_base_frame: base_link
+transform_tolerance: 0.3
+update_frequency: 5.0
+publish_frequency: 2.0
+
+# 로봇 반경(보수적) — TEB와 일치 유지 권장
+footprint: [[0.16, 0.12], [0.16, -0.12], [-0.16, -0.12], [-0.16, 0.12]]   # 0.32×0.24m 근사
+footprint_padding: 0.02
+
+obstacle_layer:
+  enabled: true
+  observation_sources: laser_scan_sensor
+  laser_scan_sensor:
+    sensor_frame: base_laser
+    topic: /scan
+    data_type: LaserScan
+    expected_update_rate: 0.0
+    clearing: true
+    marking: true
+    inf_is_valid: true
+    min_obstacle_height: 0.0
+    max_obstacle_height: 2.0
+
+inflation_layer:
+  enabled: true
+  inflation_radius: 0.55    # 로봇크기+여유(좁으면 0.45~0.5)
+  cost_scaling_factor: 3.0
+
+static_layer:
+  enabled: true

@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>limo_bringup</name>
+  <version>0.1.0</version>
+  <description>LIMO system bringup and composition launcher</description>
+
+  <maintainer email="you@example.com">Joohee Cho</maintainer>
+  <license>BSD-3-Clause</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- 런타임 의존 -->
+  <exec_depend>roslaunch</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>diagnostic_msgs</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>xacro</exec_depend>
+
+  <!-- 내부 패키지들 (존재 시) -->
+  <exec_depend>limo_description</exec_depend>
+  <exec_depend>limo_sensors</exec_depend>
+  <exec_depend>limo_tf</exec_depend>
+  <exec_depend>limo_robot_localization</exec_depend>
+  <exec_depend>limo_navigation</exec_depend>
+  <exec_depend>limo_mission_manager</exec_depend>
+  <exec_depend>limo_control</exec_depend>
+  <exec_depend>limo_mode_manager</exec_depend>
+  <exec_depend>limo_perception</exec_depend>
+
+  <!-- 하드웨어 계층 -->
+  <exec_depend>limo_base</exec_depend>
+  <exec_depend>ugv_sdk</exec_depend>
+</package>

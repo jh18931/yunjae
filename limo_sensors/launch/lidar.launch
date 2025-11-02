@@ -1,0 +1,40 @@
+<launch>
+  <rosparam file="$(find limo_sensors)/params/lidar.yaml" command="load"/>
+
+  <arg name="lidar_type" default="$(param lidar_type)"/>
+
+  <!-- 1) RPLIDAR -->
+  <group if="$(eval arg('lidar_type') == 'rplidar')">
+    <node pkg="rplidar_ros" type="rplidarNode" name="rplidar" output="screen">
+      <param name="serial_port" value="$(param serial_port)"/>
+      <param name="serial_baudrate" value="$(param serial_baudrate)"/>
+      <param name="frame_id" value="$(param frame_id)"/>
+      <param name="inverted" value="false"/>
+      <param name="angle_compensate" value="true"/>
+      <remap from="scan" to="$(param scan_topic_out)"/>
+    </node>
+  </group>
+
+  <!-- 2) YDLIDAR -->
+  <group if="$(eval arg('lidar_type') == 'ydlidar')">
+    <node pkg="ydlidar_ros" type="ydlidar_node" name="ydlidar" output="screen">
+      <param name="port" value="$(param serial_port)"/>
+      <param name="baudrate" value="$(param serial_baudrate)"/>
+      <param name="frame_id" value="$(param frame_id)"/>
+      <remap from="scan" to="$(param scan_topic_out)"/>
+    </node>
+  </group>
+
+  <!-- 3) 외부 벤더 launch를 include 하고 싶을 때: lidar_type=vendor + file arg 제공 -->
+  <group if="$(eval arg('lidar_type') == 'vendor')">
+    <arg name="vendor_launch" default=""/>
+    <include if="$(eval arg('vendor_launch') != '')" file="$(arg vendor_launch)"/>
+  </group>
+
+  <!-- 4) 이미 어딘가에서 /scan_raw가 나오고 있으면: 가벼운 재발행/프레임 고정 -->
+  <group if="$(eval arg('lidar_type') == 'raw_passthrough')">
+    <node pkg="limo_sensors" type="lidar_driver_node.py" name="lidar_repub" output="screen">
+      <rosparam file="$(find limo_sensors)/params/lidar.yaml" command="load"/>
+    </node>
+  </group>
+</launch>

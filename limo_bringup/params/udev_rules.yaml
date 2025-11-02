@@ -1,0 +1,10 @@
+udev_rules_example: |
+  # LIDAR 고정
+  SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", SYMLINK+="rplidar"
+  # CAMERA 고정
+  KERNEL=="video*", ATTR{name}=="*Camera*", SYMLINK+="limo_cam0"
+
+how_to_apply: |
+  1) 내용을 /etc/udev/rules.d/99-limo.rules 로 저장
+  2) sudo udevadm control --reload-rules && sudo udevadm trigger
+  3) 재연결 후 /dev/rplidar, /dev/limo_cam0 로 접근
