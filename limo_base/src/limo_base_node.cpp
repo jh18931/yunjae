@@ -62,8 +62,15 @@ void LimoBaseNode::spin()
     st.hardware_id = "limo";
     st.level = DiagnosticStatus::OK;
     st.message = "OK";
-    st.values.push_back(KeyValue("cmd_sub", cmd_sub_topic_));
-    st.values.push_back(KeyValue("ugv_cmd_topic", ugv_cmd_topic_));
+    diagnostic_msgs::KeyValue kv_cmd_sub;
+    kv_cmd_sub.key = "cmd_sub";
+    kv_cmd_sub.value = cmd_sub_topic_;
+    st.values.push_back(kv_cmd_sub);
+    
+    diagnostic_msgs::KeyValue kv_ugv_cmd;
+    kv_ugv_cmd.key = "ugv_cmd_topic";
+    kv_ugv_cmd.value = ugv_cmd_topic_;
+    st.values.push_back(kv_ugv_cmd);
     arr.status.push_back(st);
     pub_diag_.publish(arr);
 
