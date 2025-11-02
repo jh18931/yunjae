@@ -68,7 +68,7 @@ inline bool SerialPort::open(const std::string& port, int baud){
  tcflush(fd_, TCIFLUSH);
  if (tcsetattr(fd_, TCSANOW, &tty) != 0) { close(); return false; }
 
- 
+
  int flags = fcntl(fd_, F_GETFL, 0);
  fcntl(fd_, F_SETFL, flags & ~O_NONBLOCK);
 
