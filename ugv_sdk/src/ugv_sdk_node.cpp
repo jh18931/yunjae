@@ -176,11 +176,31 @@ private:
       st.name = "ugv_sdk_node"; st.hardware_id = "limo";
       st.level = port_serial_.isOpen() ? DiagnosticStatus::OK : DiagnosticStatus::WARN;
       st.message = port_serial_.isOpen() ? "serial ok" : "disconnected";
-      st.values.push_back(KeyValue("port", port_));
-      st.values.push_back(KeyValue("baudrate", std::to_string(baudrate_)));
-      st.values.push_back(KeyValue("cmd_topic", cmd_topic_));
-      st.values.push_back(KeyValue("odom_topic", odom_topic_));
-      st.values.push_back(KeyValue("imu_topic", imu_topic_));
+      diagnostic_msgs::KeyValue kv_port;
+      kv_port.key = "port";
+      kv_port.value = port_;
+      st.values.push_back(kv_port);
+      
+      diagnostic_msgs::KeyValue kv_baud;
+      kv_baud.key = "baudrate";
+      kv_baud.value = std::to_string(baudrate_);
+      st.values.push_back(kv_baud);
+      
+      diagnostic_msgs::KeyValue kv_cmd;
+      kv_cmd.key = "cmd_topic";
+      kv_cmd.value = cmd_topic_;
+      st.values.push_back(kv_cmd);
+      
+      diagnostic_msgs::KeyValue kv_odom;
+      kv_odom.key = "odom_topic";
+      kv_odom.value = odom_topic_;
+      st.values.push_back(kv_odom);
+      
+      diagnostic_msgs::KeyValue kv_imu;
+      kv_imu.key = "imu_topic";
+      kv_imu.value = imu_topic_;
+      st.values.push_back(kv_imu);
+      
       arr.status.push_back(st);
       pub_diag_arr_.publish(arr);
       r.sleep();
